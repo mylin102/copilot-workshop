@@ -3,6 +3,7 @@
 
 const STORAGE_KEY = 'workshop-todos';
 const THEME_KEY = 'workshop-theme';
+const FILTER_KEY = 'workshop-filter';
 
 // 取得畫面上會用到的元素
 const form = document.getElementById('todo-form');
@@ -21,7 +22,7 @@ const themeLabel = document.getElementById('theme-label');
 let todos = loadTodos();
 
 // 目前的篩選條件:'all' | 'active' | 'completed'
-let currentFilter = 'all';
+let currentFilter = loadFilter();
 
 // ---------- 資料存取 ----------
 
@@ -40,6 +41,17 @@ function loadTodos() {
 /** 把目前的待辦清單寫回 localStorage */
 function saveTodos() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+}
+
+/** 讀回篩選偏好；缺失或無效時回到「全部」 */
+function loadFilter() {
+  try {
+    const saved = localStorage.getItem(FILTER_KEY);
+    return ['all', 'active', 'completed'].includes(saved) ? saved : 'all';
+  } catch (error) {
+    console.warn('讀取篩選偏好失敗,將顯示全部事項。', error);
+    return 'all';
+  }
 }
 
 // ---------- 深色模式 ----------
@@ -186,6 +198,7 @@ function deleteTodo(id) {
 /** 切換篩選條件 */
 function setFilter(filter) {
   currentFilter = filter;
+  localStorage.setItem(FILTER_KEY, filter);
   filterFeedback.hidden = true;
   filterFeedback.textContent = '';
 
@@ -240,4 +253,4 @@ themeToggle.addEventListener('click', () => {
 
 // 頁面載入時先套用主題並畫一次清單
 initTheme();
-render();
+setFilter(currentFilter);
