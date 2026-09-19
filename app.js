@@ -11,6 +11,7 @@ const list = document.getElementById('todo-list');
 const emptyState = document.getElementById('empty-state');
 const remainingCount = document.getElementById('remaining-count');
 const filterButtons = document.querySelectorAll('.btn-filter');
+const filterFeedback = document.getElementById('filter-feedback');
 const themeToggle = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
 const themeLabel = document.getElementById('theme-label');
@@ -91,9 +92,9 @@ function getEmptyMessage() {
     return '還沒有任何待辦事項,新增一個吧!';
   }
   if (currentFilter === 'active') {
-    return '太棒了,沒有未完成的事項!';
+    return '目前沒有未完成的事項；其他項目仍保留在「全部」清單中。';
   }
-  return '還沒有已完成的事項。';
+  return '目前沒有已完成的事項；其他項目仍保留在「全部」清單中。';
 }
 
 /** 依照目前的 todos 陣列與篩選條件,重新畫出整份清單 */
@@ -158,11 +159,21 @@ function addTodo(text) {
 
 /** 切換某一筆待辦的完成狀態 */
 function toggleTodo(id) {
+  const changed = todos.find((todo) => todo.id === id);
   todos = todos.map((todo) =>
     todo.id === id ? { ...todo, completed: !todo.completed } : todo
   );
   saveTodos();
   render();
+  // 在篩選清單中切換狀態會讓該項目隱藏，明確告知資料仍在。
+  const filteredOut = changed && (
+    (currentFilter === 'completed' && changed.completed) ||
+    (currentFilter === 'active' && !changed.completed)
+  );
+  filterFeedback.hidden = !filteredOut;
+  filterFeedback.textContent = filteredOut
+    ? `「${changed.text}」已更新，因目前篩選條件而隱藏；請到「全部」查看。`
+    : '';
 }
 
 /** 刪除某一筆待辦 */
@@ -175,6 +186,8 @@ function deleteTodo(id) {
 /** 切換篩選條件 */
 function setFilter(filter) {
   currentFilter = filter;
+  filterFeedback.hidden = true;
+  filterFeedback.textContent = '';
 
   filterButtons.forEach((button) => {
     const isActive = button.dataset.filter === filter;
