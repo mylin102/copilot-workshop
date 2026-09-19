@@ -172,6 +172,12 @@ h1 {
   border-color: var(--accent);
 }
 
+.filter-feedback {
+  margin: 0 0 16px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
 /* ---------- 清單 ---------- */
 .todo-list {
   list-style: none;
